@@ -222,3 +222,7 @@ Below are the 10 fold cross-validated MAE for the models used to predict the S&P
 | MAE LASSO Model                | 0.5744%           | 0.000003  |                  |
 | MAE Elastic Net Model          | 0.5750%           | 0.0000014 | 2                |          
 | MAE Square Root LASSO          | 0.5728%           | 0.0004    |                  |
+
+It seems that all of the regularization methods outperformed the baseline linear model when predicing S&P 500 daily returns. All the regularization techniques performed better at predicting coefficients that would result in predictions that produce lower MAE's because the regularization techniques were configured to take into account data with multicolinearity present. In particular, the Square Root Lasso regression performed the best with the lowest MAE of .5728%, and performed especially well because the Square Root LASSO accounts for multicolinearity and penalizes in a way that produces sparse solutions.  Clearly there is merit to using feature selection or regularization techniques as opposed to a simple linear model for predicting daily S&P returns. 
+
+For further future analysis, I plan to expand on this project by also examining the performance of Kernel Weighted Regressions (Loess), stepwise regression, neural networks, XGBoost, SVR, Random Forests, as well as evaluate the potential use of polynomial features for polynomial regression. I wouild also like to evaluate why certain models perform better than others. 
