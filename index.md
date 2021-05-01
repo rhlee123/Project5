@@ -93,5 +93,132 @@ To further take a look at the stock market dataset, here is a heatmap showing th
 
 ![image](https://user-images.githubusercontent.com/55299814/116769394-c915aa80-aa09-11eb-8675-2a557ad5b74b.png)
 
+Clearly, there is strong correlation between the features, which indicates that regularization might be helpful in effectively estimating coefficients despite the multicollinearity present. Further, it indicates that regularization might reduce the MAE of a model that looks to predict price using these features. It should be noted as well that features are mostly negatively correlated with one another and because of the use of the previous day returns in the dataset as well, many features are also completely uncorrelated with one another. However, through in through, the correlation matrix above suggest that the use of regularization techniques may be helpful in more accurately predicting S&P 500 returns than the baseline linear model due to the excessive multicollinearity presaent. 
+
+## Initializing Models
+
+Below is code for intializing the a function to calculate the 10 fold K-fold cross-validated MAE for the different models used in this preliminary analysis.  
+
+### Linear Regression 
+```python 
+def DoKFold(X,y,n):
+  kf = KFold(n_splits=n,shuffle=True, random_state = 1234)
+  mae = []
+  for idxtrain, idxtest in kf.split(X):
+    X_train = X[idxtrain,:]
+    y_train = y[idxtrain]
+    X_test  = X[idxtest,:]
+    y_test  = y[idxtest]
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    yhat_linear = model.predict(X_test)
+    mae.append(mean_absolute_error(y_test,yhat_linear))
+  return print("MAE Linear Model = {:,.4f}%".format(np.mean(mae)*100))
+  ```
+ 
+### Ridge 
+
+```python 
+def DoKFold(X,y,alpha,n):
+  kf = KFold(n_splits=n,shuffle=True, random_state = 1234)
+  mae = []
+  for idxtrain, idxtest in kf.split(X):
+    X_train = X[idxtrain,:]
+    y_train = y[idxtrain]
+    X_test  = X[idxtest,:]
+    y_test  = y[idxtest]
+    model = Ridge(alpha = alpha)
+    model.fit(X_train, y_train)
+    yhat_ridge = model.predict(X_test)
+    mae.append(mean_absolute_error(y_test,yhat_ridge))
+  return print("MAE Ridge Model = {:,.4f}%".format(np.mean(mae)*100))
+  ```
+
+### LASSO 
+
+```python 
+def DoKFold(X,y,alpha,n):
+  kf = KFold(n_splits=n,shuffle=True, random_state = 1234)
+  mae = []
+  for idxtrain, idxtest in kf.split(X):
+    X_train = X[idxtrain,:]
+    y_train = y[idxtrain]
+    X_test  = X[idxtest,:]
+    y_test  = y[idxtest]
+    model = Lasso(alpha = alpha)
+    model.fit(X_train, y_train)
+    yhat_lasso = model.predict(X_test)
+    mae.append(mean_absolute_error(y_test,yhat_lasso))
+  return print("MAE Lasso Model = {:,.4f}%".format(np.mean(mae)*100))
+  ```
+
+### Elastic Net
+
+```python 
+def DoKFold(X,y,alpha,l,n):
+  kf = KFold(n_splits=n,shuffle=True, random_state = 1234)
+  mae = []
+  for idxtrain, idxtest in kf.split(X):
+    X_train = X[idxtrain,:]
+    y_train = y[idxtrain]
+    X_test  = X[idxtest,:]
+    y_test  = y[idxtest]
+    model = ElasticNet(alpha = alpha, l1_ratio=l)
+    model.fit(X_train, y_train)
+    yhat_EN = model.predict(X_test)
+    mae.append(mean_absolute_error(y_test,yhat_EN))
+  return print("MAE Elastic Net Model = {:,.4f}%".format(np.mean(mae)*100))
+```
+
+### SQRT LASSO
+
+```python 
+def sqrtlasso_model(X,y,alpha):
+  n = X.shape[0]
+  p = X.shape[1]
+  #we add an extra columns of 1 for the intercept
+  #X = np.c_[np.ones((n,1)),X]
+  def sqrtlasso(beta):
+    beta = beta.flatten()
+    beta = beta.reshape(-1,1)
+    n = len(y)
+    return np.sqrt(1/n*np.sum((y-X.dot(beta))**2)) + alpha*np.sum(np.abs(beta))
+  
+  
+  def dsqrtlasso(beta):
+    beta = beta.flatten()
+    beta = beta.reshape(-1,1)
+    n = len(y)
+    return np.array((-1/np.sqrt(n))*np.transpose(X).dot(y-X.dot(beta))/np.sqrt(np.sum((y-X.dot(beta))**2))+alpha*np.sign(beta)).flatten()
+  b0 = np.ones((p,1))
+  output = minimize(sqrtlasso, b0, method='L-BFGS-B', jac=dsqrtlasso,options={'gtol': 1e-8, 'maxiter': 1e8,'maxls': 25,'disp': True})
+  return output.x
+
+def DoKFoldSqrt(X,y,a,k,d):
+  PE = []
+  kf = KFold(n_splits=k,shuffle=True,random_state=1234)
+  for idxtrain, idxtest in kf.split(X):
+    X_train = X[idxtrain,:]
+    y_train = y[idxtrain]
+    X_test  = X[idxtest,:]
+    y_test  = y[idxtest]
+    beta_sqrt = sqrtlasso_model(X_train,y_train,a)
+    n = X_test.shape[0]
+    p = X_test.shape[1]
+    yhat_sqrt = X_test.dot(beta_sqrt)
+    PE.append(MAE(y_test,yhat_sqrt))
+  return 100*np.mean(PE)
+```
 
 
+## Analysis/Conclusion 
+
+Below are the 10 fold cross-validated MAE for the models used to predict the S&P 500 daily returns as well as the optimal hyperparameters. 
+
+| Model                          | MAE               | Optimal α | Optimal L1 Ratio |
+|--------------------------------|-------------------|---------- |------------------|
+| MAE Linear Model               | 0.5909%           |           |                  |              
+| MAE Ridge Regression Model     | 0.5775%           | 0.011     |                  |
+| MAE LASSO Model                | 0.5744%           | 0.000003  |                  |
+| MAE Elastic Net Model          | 0.5750%           | 0.0000014 | 2                |          
+| MAE Square Root LASSO          | 0.5728%           | 0.0004    |                  |
