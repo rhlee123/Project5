@@ -14,7 +14,8 @@ L2 regularization, or commonly known as ridge regularization, is a type of regul
 
 Ridge regularization is especially useful when there is multicolinearity within data, and further, ridge regularization seeks to ultimately minimze the cost function:
 
-![\sum_{i=1}^N (y_i - \hat{y}_i)^2 + \alpha \sum_{i=1}^p |\beta_i^2| ](https://render.githubusercontent.com/render/math?math=%5Cdisplaystyle+%21%5B%5Csum_%7Bi%3D1%7D%5EN+%28y_i+-+%5Chat%7By%7D_i%29%5E2+%2B+%5Calpha+%5Csum_%7Bi%3D1%7D%5Ep+%7C%5Cbeta_i%5E2%7C+)
+![image](https://user-images.githubusercontent.com/55299814/116770213-c1590480-aa0f-11eb-9d0b-44690d598453.png)
+
 
 (α) in this instance is the hyperparameter that determines the strength of regularization, or the strength of the penalty on the model. 
 ### LASSO
