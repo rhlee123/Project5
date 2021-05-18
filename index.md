@@ -39,8 +39,7 @@ Elastic net regularization is a good middle ground between the other techniques,
 
 Square Root LASSO slightly adjusts the LASSO method, in which it takes the square root of the LASSO cost function. It is important to note that L1 norm is still used for its penalty. Ultimately, lasso weights features by minimizing the cost function: 
 
-![\sqrt{\frac{1}{n}\sum\lim_{i=1}^{n}(y_i-\hat{y}_i)^2} +\alpha\sum\lim_{i=1}^{p}|\beta_i|
-](https://render.githubusercontent.com/render/math?math=%5Cdisplaystyle+%5Csqrt%7B%5Cfrac%7B1%7D%7Bn%7D%5Csum%5Clim_%7Bi%3D1%7D%5E%7Bn%7D%28y_i-%5Chat%7By%7D_i%29%5E2%7D+%2B%5Calpha%5Csum%5Clim_%7Bi%3D1%7D%5E%7Bp%7D%7C%5Cbeta_i%7C%0A)
+![image](https://user-images.githubusercontent.com/55299814/118607213-5127de00-b786-11eb-87d3-9d1fba62fcca.png)
 
 ### Kernel Weighted Regression (LOESS)
 
